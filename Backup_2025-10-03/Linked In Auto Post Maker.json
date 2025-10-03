@@ -1,0 +1,579 @@
+{
+  "createdAt": "2025-10-02T15:52:26.607Z",
+  "updatedAt": "2025-10-03T05:35:33.000Z",
+  "id": "GJ5WOnB8irwMe6tR",
+  "name": "Linked In Auto Post Maker",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 30,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1355428184,
+          "mode": "list",
+          "cachedResultName": "Posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit#gid=1355428184"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -4352,
+        80
+      ],
+      "id": "498d2a37-7f2d-40a2-9b5d-9d06e0671026",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "d5lOSki25hTRvX3v",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "699ad08d-6453-4719-8c91-0ada48fff53b",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "=pending",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4128,
+        80
+      ],
+      "id": "c6a638e1-f05f-4956-9009-ec6eb29903ee",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -3904,
+        -32
+      ],
+      "id": "c24da31a-9781-4b20-aef5-2688242ba7c0",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a LinkedIn post writer. You will be given a title and your task is to create an engaging LinkedIn post based on that title.\n\nYour post should:\n\n1. Begin with a compelling hook related to the title\n2. Include 3-4 paragraphs of informative content\n3. End with a question to encourage engagement\n4. Include 4-6 relevant hashtags\n5. Use appropriate emojis in between\n\nImportant formatting requirements:\n\n- Format all paragraphs with proper newline characters (\\n\\n) between them\n- Ensure the text is properly escaped for JSON\n- Do not use double quote (\"\") in response of any special character\n- Do not put asterisk\n- Keep the overall length appropriate for LinkedIn (under 3000 characters)\n\nNow, create a LinkedIn post based on the following title:{{ $json['Linkedin Post Title '] }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -3696,
+        -32
+      ],
+      "id": "f951d3bb-3312-4d07-92f5-339de9a6f587",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"post\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t\t\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -3440,
+        224
+      ],
+      "id": "1eaa2487-6eda-4874-ab72-198a98547b03",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -3792,
+        240
+      ],
+      "id": "50b2eec3-3e73-42f2-b2c6-f17cdbb09a0c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7QQn8aFBTqTavwYc",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.linkedin.com/v2/userinfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3008,
+        -32
+      ],
+      "id": "d4546b53-5248-4483-ac44-e4ee963fee8f",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "woNHaizRjynbs479",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"author\": \"urn:li:person:{{ $json.sub }}\",\n    \"lifecycleState\": \"PUBLISHED\",\n    \"specificContent\": {\n        \"com.linkedin.ugc.ShareContent\": {\n            \"shareCommentary\": {\n                \"text\": \"{{ $('Code').item.json.output.post }}\"\n            },\n            \"shareMediaCategory\": \"NONE\"\n        }\n    },\n    \"visibility\": {\n        \"com.linkedin.ugc.MemberNetworkVisibility\": \"PUBLIC\"\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2608,
+        -208
+      ],
+      "id": "3ad57ea2-8f12-418e-8c35-ae2c90a8d246",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "woNHaizRjynbs479",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  item.json.output.post = item.json.output.post.replace(\n    /\\n/g,\n    \"\\\\n\",\n  );\n  return item;\n});\n\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3328,
+        -32
+      ],
+      "id": "f2dafc7a-a710-4544-bac1-2aaed0883715",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1417457708,
+          "mode": "list",
+          "cachedResultName": "Linkedin Groups",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit#gid=1417457708"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -2688,
+        160
+      ],
+      "id": "7800759c-4bf4-4e55-9c03-5301a674b78d",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LXE1XP8877ZX7VtN",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2464,
+        160
+      ],
+      "id": "ee6231f6-61c3-490a-a204-d648c5177232",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linkedin.com/v2/ugcPosts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"author\": \"urn:li:person:{{ $('HTTP Request').item.json.sub }}\",\n    \"containerEntity\": \"urn:li:group:{{ $json['Groups ID'] }}\",\n    \"lifecycleState\": \"PUBLISHED\",\n    \"specificContent\": {\n        \"com.linkedin.ugc.ShareContent\": {\n            \"shareCommentary\": {\n                \"text\": \"{{ $('Code').item.json.output.post }}\"\n            },\n            \"shareMediaCategory\": \"NONE\"\n        }\n    },\n    \"visibility\": {\n        \"com.linkedin.ugc.MemberNetworkVisibility\": \"CONTAINER\"\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1968,
+        176
+      ],
+      "id": "ef93d8d8-c035-472c-9b92-bbbc92452c32",
+      "name": "HTTP Request3",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "woNHaizRjynbs479",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        -1904,
+        -304
+      ],
+      "id": "22b9e0e8-a1c2-4b55-a227-478616a01610",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1355428184,
+          "mode": "list",
+          "cachedResultName": "Posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit#gid=1355428184"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $('Limit').item.json.ID }}",
+            "Status": "posted"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Linkedin Post Title ",
+              "displayName": "Linkedin Post Title ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1616,
+        -304
+      ],
+      "id": "9f850dbe-9533-421e-b1ec-c7c0c63d0a5f",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LXE1XP8877ZX7VtN",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Google Sheets Trigger": {
+      "documentId": "1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w",
+      "sheetId": 1355428184,
+      "lastRevision": 1870,
+      "lastRevisionLink": "https://docs.google.com/spreadsheets/export?id=1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w&revision=1870&exportFormat=xlsx",
+      "lastIndexChecked": 84
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "5bc3a748-a63b-420a-b692-898b8ce6e551",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-02T15:52:26.615Z",
+      "updatedAt": "2025-10-02T15:52:26.615Z",
+      "role": "workflow:owner",
+      "workflowId": "GJ5WOnB8irwMe6tR",
+      "projectId": "c3qIJ4jA48xVTq7h"
+    }
+  ],
+  "tags": [
+    {
+      "createdAt": "2025-10-02T15:50:21.835Z",
+      "updatedAt": "2025-10-02T15:50:21.835Z",
+      "id": "Et0AdpAw1THTRE2w",
+      "name": "test"
+    },
+    {
+      "createdAt": "2025-10-02T15:50:21.743Z",
+      "updatedAt": "2025-10-02T15:50:21.743Z",
+      "id": "yN6LSRh7P63qG9Ze",
+      "name": "youtubeshorts"
+    }
+  ]
+}
