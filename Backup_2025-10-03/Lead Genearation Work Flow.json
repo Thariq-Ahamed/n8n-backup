@@ -1,0 +1,397 @@
+{
+  "createdAt": "2025-10-03T13:55:23.359Z",
+  "updatedAt": "2025-10-03T13:55:52.000Z",
+  "id": "NhCZ5jgsLRUeEaLa",
+  "name": "Lead Genearation Work Flow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "name": "leadScraping",
+        "description": "=Call this tool to scrape leads once you have enough details about the search query. \n\nYour input must be in json like this: \n\n[\n  {\n    \"location\": [\n      \"LOCATION1+HERE\",\n      \"LOCATION2+HERE\",\n      ...\n    ],\n    \"business\": [\n      \"BUSINESS1+HERE\",\n      \"BUSINESS2+HERE\",\n      ...\n    ],\n    \"job_title\": [\n      \"TITLE1+HERE\",\n      \"TITLE2+HERE\",\n      ...\n    ]\n  }\n]",
+        "workflowId": {
+          "__rl": true,
+          "value": "IGqcCiXl993hocrl",
+          "mode": "list",
+          "cachedResultName": "lead_scraper"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": [],
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        768,
+        464
+      ],
+      "id": "c7797a2d-df72-4df3-b85d-6c598c9560ff",
+      "name": "leadScraping"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=# Overview \nYou are a lead generation agent, responsible for scraping and sending hiring mail to the leads .\n\n# Tools \n### leadScraping: \nUse this tool to scrape leads into a Google Sheet and then send mail to all the Leads with the email address with the given subject . Only call this tool once you have enough information to complete the desired JSON search query. \n\n\n# Rules \n- Ask clarifying questions if you're unsure about something. \n- Ask questions to gather enough information to satisfy the query for each of the tools. \n- You should introduce yourself as \"Lead Generation WL\" and ask the user what leads they want to scrape today. \n- Always replace spaces with '+' in your search queries. For example, instead of \"los angeles united states\", your query should be \"los+angeles+united+states\".  \n- Make sure you always call the tools with correct JSON formatting, but don't wrap the query in ```json```.\n-Make sure to send mail to all erson who has email address.\n\n# Example \n- Input: \"Hi\" \n- Output: \"Hi, I'm Lead Generation Joe, which leads can I help you scrape today? Just tell me the locations, Business and job titles and let me handle the rest! \" \n- Input: \"Let's do n Locations: n - Chicago United States n - Sydney Australia nn Business: n - Financial Planners n] \n- Output: \"Awesome. I think you forgot the job titles. Which job titles should I search for?\" \n- Input: \"Only CEOs please\" \n- Call leadScrape tool with query: \n\n[\n  {\n    \"location\": [\n      \"chicago+united+states\",\n      \"sydney+australia\"\n    ],\n    \"business\": [\n      \"financial+planner\"\n    ],\n    \"job_title\": [\n      \"ceo\"\n    ]\n  }\n] \n- Input from tool: \"25 new contacts have been added to the Google Sheet!\" \n- Output: \"Done! I've added 25 new contacts to the Google Sheet. Let me know if you need anything else!\" \n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        480,
+        112
+      ],
+      "id": "395ad8e5-be0f-49f3-ac50-62e5613201f8",
+      "name": "Lead Agent",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        464
+      ],
+      "id": "8972c921-79eb-4375-8a79-43748691122b",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 1
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        464
+      ],
+      "id": "77cf110a-9827-4a4c-a5f7-a485ec4e6623",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "44853e50-6913-4900-9f16-7f5fe0b6b7bc",
+      "name": "Download File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        -16
+      ],
+      "webhookId": "83bb7385-33f6-4105-8294-1a91c0ebbee5"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "cf7ba896-f5a6-4626-b918-2c86b668ab0b",
+      "name": "Transcribe",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        112,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe7ecc99-e1e8-4a5e-bdd6-6fce9757b234",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dbd291da-cf2c-4476-8ea1-10bbcf627735",
+      "name": "Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8c844924-b2ed-48b0-935c-c66a8fd0c778",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d3bf469-f0c6-4401-9441-170e8b369555",
+      "name": "Voice or Text",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -448,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "9a205abd-91af-42dc-bf4f-19f423749493",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -736,
+        112
+      ],
+      "webhookId": "99eab1a0-569d-4f0f-a49e-578a02abfe63"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "590e3e67-0055-4187-b97e-4dab56dc7bda",
+      "name": "Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        16
+      ],
+      "webhookId": "5dced4b9-5066-4036-a4d4-14fc07edd53c"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.error }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "7ffd39bc-4db8-4207-aee7-67973dfb37cf",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        288
+      ],
+      "webhookId": "5dced4b9-5066-4036-a4d4-14fc07edd53c"
+    }
+  ],
+  "connections": {
+    "leadScraping": {
+      "ai_tool": [
+        [
+          {
+            "node": "Lead Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Lead Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Lead Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe": {
+      "main": [
+        [
+          {
+            "node": "Lead Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text": {
+      "main": [
+        [
+          {
+            "node": "Lead Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice or Text": {
+      "main": [
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Voice or Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "6a959d2a-87c9-4bdf-aa37-f47e11ba4dcc",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-10-03T13:55:23.365Z",
+      "updatedAt": "2025-10-03T13:55:23.365Z",
+      "role": "workflow:owner",
+      "workflowId": "NhCZ5jgsLRUeEaLa",
+      "projectId": "c3qIJ4jA48xVTq7h"
+    }
+  ],
+  "tags": []
+}
