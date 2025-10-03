@@ -1,0 +1,197 @@
+{
+  "createdAt": "2025-10-02T16:16:12.050Z",
+  "updatedAt": "2025-10-02T16:22:32.000Z",
+  "id": "XEHqdAHVqv0UHm06",
+  "name": "Linkedin Post Title Generator",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a6c30805-d537-4730-9f47-a9e8b28ec8c6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a very helpful Assistant.\n\nYour Job is Filter Best SEO Ranked Topic Title for the Day related to AI and New Techs.\n\nFor example: Is AGI Dangerous to skill workers?\n\nNote: only print one title.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7e8cc509-92c0-481b-9d0d-c481211cc6ec",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        208
+      ],
+      "id": "aa016caa-2272-4655-b327-6a18be0ea9b3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7QQn8aFBTqTavwYc",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1355428184,
+          "mode": "list",
+          "cachedResultName": "Posts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jbKLqP8qPTKn2HE6zeNxrpMb7Jg2ElP3HzynX4F7I8w/edit#gid=1355428184"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Linkedin Post Title ": "={{ $json.output }}",
+            "Status": "pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Linkedin Post Title ",
+              "displayName": "Linkedin Post Title ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        0
+      ],
+      "id": "ff80e558-81f1-4e5b-bf59-68548ce94889",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LXE1XP8877ZX7VtN",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "adfb68f6-1234-4eff-ac37-eb34b7e7154b",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-10-02T16:16:12.053Z",
+      "updatedAt": "2025-10-02T16:16:12.053Z",
+      "role": "workflow:owner",
+      "workflowId": "XEHqdAHVqv0UHm06",
+      "projectId": "c3qIJ4jA48xVTq7h"
+    }
+  ],
+  "tags": []
+}
